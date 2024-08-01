@@ -171,7 +171,7 @@ export class RecvPacket extends Packet {
   streamNo!: string // 流式编号
   streamSeq!: number // 流式序列号
   streamFlag!: StreamFlag // 流式标示
-  timestamp!: number; // 消息时间戳
+  timestamp!: BigNumber; // 消息时间戳
   channelID!: string; // 频道ID
   channelType!: number; // 频道类型
   expire?: number // 消息过期时间
@@ -211,6 +211,7 @@ export class SendackPacket extends Packet {
   /* tslint:disable-line */
   clientSeq!: number;
   messageID!: BigNumber;
+  timestamp!: BigNumber; //时间戳
   messageSeq!: number;
   reasonCode!: number;
   public get packetType() {
@@ -339,7 +340,7 @@ export default class Proto implements IProto {
     // channel
     enc.writeString(packet.channelID);
     enc.writeByte(packet.channelType);
-    if(serverVersion>=3) {
+    if (serverVersion >= 3) {
       enc.writeInt32(packet.expire || 0)
     }
     // msg key
@@ -395,7 +396,7 @@ export default class Proto implements IProto {
     if (f.hasServerVersion) {
       p.serverVersion = decode.readByte()
       serverVersion = p.serverVersion
-      console.log("服务器协议版本:",serverVersion)
+      console.log("服务器协议版本:", serverVersion)
     }
 
     p.timeDiff = decode.readInt64();
@@ -423,7 +424,7 @@ export default class Proto implements IProto {
     p.fromUID = decode.readString();
     p.channelID = decode.readString();
     p.channelType = decode.readByte();
-    if(serverVersion>=3) {
+    if (serverVersion >= 3) {
       p.expire = decode.readInt32()
     }
     p.clientMsgNo = decode.readString();
@@ -434,7 +435,7 @@ export default class Proto implements IProto {
     }
     p.messageID = decode.readInt64().toString();
     p.messageSeq = decode.readInt32();
-    p.timestamp = decode.readInt32();
+    p.timestamp = decode.readInt64();
     const setting = p.setting
     if (setting.topic) {
       p.topic = decode.readString()
@@ -446,6 +447,7 @@ export default class Proto implements IProto {
     const p = new SendackPacket();
     p.from(f);
     p.messageID = decode.readInt64();
+    p.timestamp = decode.readInt64();
     p.clientSeq = decode.readInt32();
     p.messageSeq = decode.readInt32();
     p.reasonCode = decode.readByte();

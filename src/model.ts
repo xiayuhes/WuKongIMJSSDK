@@ -1,6 +1,7 @@
 import { RecvPacket, SendPacket, Setting, StreamFlag } from './proto';
 import WKSDK from './index';
 import { MessageContentType } from "./const"
+import BigNumber from 'bignumber.js';
 
 
 // ---------- 频道类型 ----------
@@ -115,7 +116,7 @@ export class Message {
         } else {
             m.content = decodePayload(sendPacket.payload)
         }
-        m.timestamp = parseInt((new Date().getTime() / 1000).toString()); /* tslint:disable-line */
+        m.timestamp = new BigNumber(parseInt((new Date().getTime()).toString())); /* tslint:disable-line */
         m.status = MessageStatus.Wait
         return m
 
@@ -134,7 +135,7 @@ export class Message {
     streams?: StreamItem[] // 流式数据
     fromUID!: string; // 发送者uid
     channel!: Channel; // 频道
-    timestamp!: number; // 消息发送时间
+    timestamp!: BigNumber; // 消息发送时间
     content!: MessageContent | any; // 消息负载
     status!: MessageStatus; // 消息状态 1.成功 其他失败
     voicePlaying: boolean = false; // 语音是否在播放中 （语音消息特有）
@@ -622,11 +623,11 @@ export class MessageImage extends MediaMessageContent {
         this.height = height || 0;
     }
 
-    set url (ul: string) {
+    set url(ul: string) {
         this._url = ul
         this.remoteUrl = ul
     }
-    get url () {
+    get url() {
         return this._url
     }
     decodeJSON(content: any) {
@@ -637,7 +638,7 @@ export class MessageImage extends MediaMessageContent {
     }
     encodeJSON() {
         let ul = this.remoteUrl
-        if(!ul || ul.length === 0) {
+        if (!ul || ul.length === 0) {
             ul = this.url
         }
         return { "width": this.width || 0, "height": this.height || 0, "url": ul || "" }
